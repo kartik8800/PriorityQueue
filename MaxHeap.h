@@ -9,14 +9,26 @@ template<class T>
 class MaxHeap
 {
     public:
+        /*
+         *constructs an empty Max heap
+         *this max heap will hold objects of type T
+         *the priority of the objects will be decided 
+         *by a user defined function.
+        */
         MaxHeap<T>(long long (*priority)(T obj));
+        //return true if the Max Heap is empty, true otherwise.
         bool isEmpty();
+        //used to insert an item in the priority queue.
         void push(T obj);
+        //deletes the highest priority item currently in the queue.
         void pop();
+        //return the highest priority item currently in the queue.
         T top();
     private:
+        //function that assign the items a priority rating 
         long long (*priority)(T obj);
-        std::vector<std::pair<int,T>> heap;
+        //the max heap is implemented using a vector.
+        std::vector<std::pair<long long,T>> heap;
         void heapifyUp(int idx);
         void heapifyDown(int idx);
         int leftChild(int i)

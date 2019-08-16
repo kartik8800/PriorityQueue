@@ -12,10 +12,10 @@ class MaxHeap
         /*
          *constructs an empty Max heap
          *this max heap will hold objects of type T
-         *the priority of the objects will be decided 
+         *the priority of the objects will be decided
          *by a user defined function.
         */
-        MaxHeap<T>(long long (*priority)(T obj));
+        MaxHeap<T> (bool (*comp)(T obj1, T obj2));
         //return true if the Max Heap is empty, true otherwise.
         bool isEmpty();
         //used to insert an item in the priority queue.
@@ -25,10 +25,10 @@ class MaxHeap
         //return the highest priority item currently in the queue.
         T top();
     private:
-        //function that assign the items a priority rating 
-        long long (*priority)(T obj);
+        //return true if obj1 compares less than obj2
+        bool (*compare)(T obj1, T obj2);
         //the max heap is implemented using a vector.
-        std::vector<std::pair<long long,T>> heap;
+        std::vector<T> heap;
         void heapifyUp(int idx);
         void heapifyDown(int idx);
         int leftChild(int i)
@@ -44,10 +44,9 @@ class MaxHeap
             return (i-1)/2;
         }
 };
-
-template<class T> MaxHeap<T>::MaxHeap(long long (*priority)(T obj))
+template<class T> MaxHeap<T>::MaxHeap(bool (*comp)(T obj1, T obj2))
 {
-    this -> priority = priority;
+    this -> compare = comp;
 }
 
 template<class T> bool MaxHeap<T>::isEmpty()
@@ -57,7 +56,7 @@ template<class T> bool MaxHeap<T>::isEmpty()
 
 template<class T> void MaxHeap<T>::push(T obj)
 {
-    heap.push_back({priority(obj),obj});
+    heap.push_back(obj);
     heapifyUp(heap.size()-1);
 }
 
@@ -65,7 +64,7 @@ template<class T> void MaxHeap<T>::pop()
 {
     if(!isEmpty())
     {
-       swap(heap[0], heap[heap.size()-1]);
+       std::swap(heap[0], heap[heap.size()-1]);
        heap.pop_back();
        if(!isEmpty())
           heapifyDown(0);
@@ -76,38 +75,28 @@ template<class T> T MaxHeap<T>::top()
 {
     if(!isEmpty())
     {
-       return heap[0].second;
+       return heap[0];
     }
 }
 
 template<class T> void MaxHeap<T>::heapifyDown(int idx)
 {
-    long long parentVal = heap[idx].first;
-    long long leftChildVal = LONG_MIN, rightChildVal = LONG_MIN;
+    int largeIdx = idx;
     int leftChildIdx = leftChild(idx), rightChildIdx = rightChild(idx);
     if(leftChildIdx < heap.size())
-          leftChildVal = heap[leftChildIdx].first;
-
-    if(rightChildIdx < heap.size())
-          rightChildVal = heap[rightChildIdx].first;
-
-    long long largeVal = parentVal, largeIdx = idx;
-
-    if(largeVal < leftChildVal)
     {
-        largeVal = leftChildVal;
-        largeIdx = leftChildIdx;
+       if(compare(heap[largeIdx], heap[leftChildIdx]))
+            largeIdx = leftChildIdx;
     }
-
-    if(largeVal < rightChildVal)
+    if(rightChildIdx < heap.size())
     {
-        largeVal = rightChildVal;
-        largeIdx = rightChildIdx;
+       if(compare(heap[largeIdx], heap[rightChildIdx]))
+            largeIdx = rightChildIdx;
     }
 
     if(largeIdx != idx)
     {
-       swap(heap[largeIdx], heap[idx]);
+       std::swap(heap[largeIdx], heap[idx]);
        heapifyDown(largeIdx);
     }
 }
@@ -117,9 +106,9 @@ template<class T> void MaxHeap<T>::heapifyUp(int idx)
     int parentIdx = parent(idx);
     if(parentIdx < 0)
             return;
-    if(heap[parentIdx].first < heap[idx].first)
+    if(compare(heap[parentIdx], heap[idx]))
     {
-        swap(heap[parentIdx], heap[idx]);
+        std::swap(heap[parentIdx], heap[idx]);
         heapifyUp(parentIdx);
     }
 }
